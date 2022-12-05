@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0,maximum-scale=1.0, minimum-scale=1.0, user-scalable=no/" />
+    <link rel="shortcut icon" href="../sanrio/images/fovicon/favicon.png.ico" type="image/x-icon" />
+    <title>Sanrio</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300;400;500;600;700&family=Noto+Sans+KR:wght@100;300;400;500;700;900&family=Sono:wght@200;300;400;500;600;700;800&family=Roboto:wght@100;300;400;500;700;900&display=swap"
+      rel="stylesheet"
+    />
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons|Material+Icons+Outlined|Material+Icons+Two+Tone|Material+Icons+Round|Material+Icons+Sharp" rel="stylesheet" />
+    <link rel="stylesheet" href="css/reset.css" />
+    <link rel="stylesheet" href="css/fancybox.css" />
+    <link rel="stylesheet" href="css/lightpick.css" />
+    <link rel="stylesheet" href="css/layout.css" />
+    <link rel="stylesheet" href="css/sanrio.css" />
+    <script src="https://kit.fontawesome.com/08ebc00fc6.js" crossorigin="anonymous"></script>
+    <script src="js/gsap/ScrollToPlugin.min.js"></script>
+    <script src="js/splitting.min.js"></script>
+    <script src="js/gsap/gsap.min.js"></script>
+    <script src="js/hangul-tools.js"></script>
+    <script src="js/chart.min.js"></script>
+    <script src="js/swiper-bundle.min.js"></script>
+    <script src="js/animation.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/ScrollTrigger.min.js"></script>
+    <script src="js/aos.js"></script>
+    <script src="js/fancybox.umd.js"></script>
+    <script src="js/jquery-3.6.1.min.js"></script>
+    <script src="js/moment.min.js"></script>
+    <script src="js/lightpick.js"></script>
+    <script src="js/isotope.pkgd.min.js"></script>
+    <script src="js/imagesloaded.pkgd.min.js"></script>
+  </head>
+  <body>
+    <header id="header">
+      <div class="header-box">
+        <h1 class="logo">
+          <a href="https://sanrio.netlify.app/"><img src="./images/logo-k.png" alt="" /></a>
+        </h1>
+        <h2 class="name">sanrio <strong>character</strong></h2>
+      </div>
+    </header>
+
+    <div class="coordinate">
+      <label><span>screen</span><input type="text" id="screen" /></label>
+      <label><span>offset</span><input type="text" id="offset" /></label>
+      <label><span>page</span><input type="text" id="page" /></label>
+      <label><span>client</span><input type="text" id="client" /></label>
+    </div>
+
+    <div class="category">
+      <ul>
+        <li class="on" data-filter="item">all</li>
+        <li data-filter="HELLOKITTY">HELLO KITTY</li>
+        <li data-filter="MYMELODY">MY MELODY</li>
+        <li data-filter="KUROMI">KUROMI</li>
+        <li data-filter="POMPOMPURIN">POMPOMPURIN</li>
+        <li data-filter="CINNAMOROLL">CINNAMOROLL</li>
+        <li data-filter="LittleTwinStars">LittleTwinStars</li>
+      </ul>
+    </div>
+
+    <div class="list">
+      <ul class="item-list">
+        <!-- <li>
+          <a href="">
+            <div class="img"><img src="images/01.jpg" alt="" /></div>
+            <div class="info">
+              <h2>제목 들어갑니다.</h2>
+              <p class="desc">내용이 들어갑니다.</p>
+              <p class="point">점수 들어갑니다.</p>
+            </div>
+          </a>
+        </li> -->
+      </ul>
+    </div>
+
+    <div class="cursor">
+      <span class="txt"></span>
+    </div>
+    <script>
+      $.ajax({ url: "data/character.json" })
+        .done(function (response) {
+          console.log(response);
+          const typoList = response.typoList;
+          let listHtml = "";
+          $.each(typoList, function (idx, item) {
+            let categoryHtml = "";
+            $.each(item.category, function (idx02, item02) {
+              categoryHtml += `<span>#${item02}</span>`;
+            });
+            listHtml += `<li class="item ${item.category.join(" ")}">
+                            <a href="images/${item.img}" data-fancybox="${item.category}">
+                                <div class="img"><img src="images/${item.img}" alt="" /></div>
+                                <div class="info">
+                                    <p class="year">${item.year}</p>
+                                    <h3>${item.title}</h3>
+                                    <p class="desc">${item.desc}</p>
+                                    <p class="category">${categoryHtml}</p>
+                                    <div class="footer">
+                                        <p class="subTitle">${item.subTitle}</p>
+                                        <p class="birth">&#127874; ${item.birth}</p>
+                                    </div>
+                                </div>
+                            </a>
+                        </li>`;
+          });
+          $(".list ul").html(listHtml);
+          const grid = $(".item-list").isotope({
+            itemSelector: ".item",
+            layoutMode: "masonry",
+            getSortData: {
+              year: ".year",
+            },
+          });
+          grid.imagesLoaded().progress(function () {
+            grid.isotope("layout");
+          });
+
+          $(".category ul li").on("click", function () {
+            $(this).addClass("on").siblings().removeClass("on");
+            const filterWord = $(this).data("filter");
+            grid.isotope({ filter: `.${filterWord}`, sortBy: "year", sortAscending: false });
+          });
+
+          //   const gridAll = $(".item-list").imagesLoaded(function () {
+          //     gridAll.isotope({
+          //       itemSelector: ".item",
+          //       layoutMode: "masonry",
+          //     });
+          //   });
+        })
+        .fail(function (error) {
+          console.log(error);
+        });
+
+      //   $(".cursor");
+      $(window).on("mousemove", function (e) {
+        const mx = e.clientX;
+        const my = e.clientY;
+        gsap.to(".cursor", { left: mx, top: my, duration: 0.5, ease: "power4" });
+        // console.log(e);
+        // $("#screen").val(`x:${e.screenX}/y:${e.screenY}/`);
+        // $("#offset").val(`x:${e.offsetX}/y:${e.offsetY}/`);
+        // $("#page").val(`x:${e.pageX}/y:${e.pageY}/`);
+        // $("#client").val(`x:${e.clientX}/y:${e.clientY}/`);
+      });
+      $(".list ul ").on("mouseenter", "li", function () {
+        $(".cursor .txt").text("");
+        gsap.to(".cursor", { width: 50, height: 50, duration: 0.5, backgroundColor: "#e60021", ease: "elastic" });
+      });
+      $(".list ul").on("mouseleave", "li", function () {
+        $(".cursor .txt").text("");
+        gsap.to(".cursor", { width: 32, height: 32, duration: 0.5, backgroundColor: "transparent", ease: "power4" });
+      });
+
+      $(".category ul li").on("mouseenter", function () {
+        $(".cursor .txt").text("");
+        gsap.to(".cursor", { width: 50, height: 50, duration: 0.5, backgroundColor: "#e60021", ease: "elastic" });
+      });
+      $(".category ul li").on("mouseleave", function () {
+        $(".cursor .txt").text("");
+        gsap.to(".cursor", { width: 32, height: 32, duration: 0.5, backgroundColor: "transparent", ease: "power4" });
+      });
+    </script>
+  </body>
+</html>
